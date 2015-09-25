@@ -12,6 +12,11 @@ import AVFoundation
 
 class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     
+    struct Constants {
+        static let numberOfComponentsInPicker = 1
+        static let numberOfRowsInPicker = 30
+    }
+    
     var player: AVPlayer!
     var playerLayer: AVPlayerLayer!
     var videoUrl: NSURL!
@@ -120,7 +125,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         // Decrement the counter variable
         counter--
         
-        if counter == 0{ // Triggered when the counter is zero
+        if counter == 0 { // Triggered when the counter is zero
             
             // Disable skip button
             skipButton.enabled = false
@@ -135,7 +140,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             // Edit the counter label
             counterLabel.font = UIFont(name: "AvenirNext-Demibold", size: 18)
             counterLabel.text = "Completed!"
-        } else{ // Set the remaining seconds to counter label
+        } else { // Set the remaining seconds to counter label
             if counter < 10 { // Add a "0" to numbers below 10
                 counterLabel.text = "00:0\(counter)"
             } else {
@@ -171,7 +176,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         alertController.addAction(selectButtonAction)
         
         // Populate picker array
-        for (var i = 1; i <= 30; i++) {
+        for (var i = 1; i <= Constants.numberOfRowsInPicker; i++) {
             pickerArray.append(i)
         }
     }
@@ -179,11 +184,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     // MARK: - PickerView delegate methods
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
-        return 1
+        return Constants.numberOfComponentsInPicker
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int{
-        return 10
+        return Constants.numberOfRowsInPicker
     }
     
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
