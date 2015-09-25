@@ -38,9 +38,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         addLoopObserver()
     }
     
-    //the element sizes are best optimized for iPhone 6s and bigger screen sizes, but it works on all iPhones except for 3.5 inch models.
-    //I'd be glad if you point out my mistakes or bad practices to help me improve my programming profile.
-    
     // MARK: - Labels & Buttons & Timer methods
     
     private func addLabelsAndButtons() {
@@ -68,7 +65,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         self.view.addSubview(seperatorView)
         
         // Create skip button, add a target and add it to the view
-        skipButton = UIButton(frame: CGRect(x: self.view.bounds.width/2 - 100, y: self.view.bounds.height - 100, width: 200, height: 50))
+        if UIScreen.mainScreen().bounds.height > 568 { // Changing y of skipButton for 4 inch screens.
+            skipButton = UIButton(frame: CGRect(x: self.view.bounds.width/2 - 100, y: self.view.bounds.height - 100, width: 200, height: 50))
+        } else {
+            skipButton = UIButton(frame: CGRect(x: self.view.bounds.width/2 - 100, y: self.view.bounds.height - 50, width: 200, height: 50))
+        }
+        
         skipButton.titleLabel?.font = UIFont(name: "AvenirNext-Regular", size: 20)
         skipButton.titleLabel?.textAlignment = NSTextAlignment.Center
         skipButton.setTitle("Skip Exercise", forState: UIControlState.Normal)
