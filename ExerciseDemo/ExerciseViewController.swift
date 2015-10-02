@@ -10,13 +10,14 @@ import UIKit
 import AVKit
 import AVFoundation
 
-class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+class ExerciseViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     
     struct Constants {
         static let numberOfComponentsInPicker = 1
         static let numberOfRowsInPicker = 30
     }
     
+    var viewModel: ExerciseViewModel!
     var player: AVPlayer!
     var playerLayer: AVPlayerLayer!
     var videoUrl: NSURL!
@@ -36,6 +37,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        self.viewModel = ExerciseViewModel()
+        
         playVideo()
         loadPickerAlertView()
         addLabelsAndButtons()
@@ -47,18 +50,16 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     private func addLabelsAndButtons() {
         
-        // Create name label and add it to the view
         nameLabel = UILabel(frame: CGRect(x: self.view.bounds.width/2 - 100, y: playerLayer.frame.origin.y + playerLayer.bounds.height + 20, width: 200, height: 50))
         nameLabel.font = UIFont(name: "AvenirNext-Demibold", size: 32)
-        nameLabel.text = "Squats"
+        nameLabel.text = viewModel.exerciseModel.name
         nameLabel.textAlignment = NSTextAlignment.Center
         self.view.addSubview(nameLabel)
         
-        // Create variation label and add it to the view
         variationLabel = UILabel(frame: CGRect(x: self.view.bounds.width/2 - 100, y: playerLayer.frame.origin.y + playerLayer.bounds.height + 100, width: 200, height: 50))
         variationLabel.font = UIFont(name: "AvenirNext-Demibold", size: 32)
         variationLabel.textAlignment = NSTextAlignment.Center
-        variationLabel.text = "to chair"
+        variationLabel.text = viewModel.exerciseModel.variation
         self.view.addSubview(variationLabel)
         
         // Calculate space between name and variation labels
@@ -69,7 +70,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         seperatorView.backgroundColor = UIColor.blackColor()
         self.view.addSubview(seperatorView)
         
-        // Create skip button, add a target and add it to the view
         if UIScreen.mainScreen().bounds.height > 568 { // Changing y of skipButton for 4 inch screens.
             skipButton = UIButton(frame: CGRect(x: self.view.bounds.width/2 - 100, y: self.view.bounds.height - 100, width: 200, height: 50))
         } else {
@@ -85,10 +85,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         self.view.addSubview(skipButton)
     }
     
-    // Triggered when "skip" button is tapped
     func skipButtonAction() {
         
-        //Present the alert controller
         presentViewController(alertController, animated: true, completion: nil);
         timer.invalidate()
         counterLabel.font = UIFont(name: "AvenirNext-Demibold", size: 20)
@@ -99,14 +97,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     private func addTimerView() {
         
-        // Create circle view and add it to the view
         circleView = CircleView(frame: CGRect(x: self.view.bounds.width/2 - 75, y: variationLabel.frame.origin.y + variationLabel.bounds.height + 20, width: 150, height: 150))
         self.view.addSubview(circleView)
         
         // Trigger the circle animation
         circleView.animateCircle(30)
         
-        // Create counter label and add it to the view
         counterLabel = UILabel(frame: CGRect(x: self.view.bounds.width/2 - 50, y: variationLabel.frame.origin.y + variationLabel.bounds.height + 70, width: 100, height: 50))
         counterLabel.text = "00:30"
         counterLabel.textAlignment = NSTextAlignment.Center
@@ -118,26 +114,19 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             , target: self, selector: Selector("updateTimer:"), userInfo: nil, repeats: true)
     }
     
-    // Triggered everytime the timer's interval is set
     func updateTimer(dt: NSTimer)
     {
-        
-        // Decrement the counter variable
         counter--
-        
-        if counter == 0 { // Triggered when the counter is zero
+        if counter == 0 {
             
-            // Disable skip button
             skipButton.enabled = false
             
-            // Invalidate the timer and reset the timer circle view
             timer.invalidate()
             circleView.resetCircle()
             
-            //Present the alert controller
             presentViewController(alertController, animated: true, completion: nil);
             
-            // Edit the counter label
+
             counterLabel.font = UIFont(name: "AvenirNext-Demibold", size: 18)
             counterLabel.text = "Completed!"
         } else { // Set the remaining seconds to counter label
@@ -153,23 +142,18 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     private func loadPickerAlertView() {
         
-        // Create the alert controller
         let title = "How many reps?"
         let message = "\n\n\n\n\n\n\n"
         alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
         alertController.modalInPopover = true
         
-        // Create the picker
         let picker = UIPickerView(frame: CGRectMake(0, 50, 270, 100))
         
-        // Set the pickers datasource and delegate
         picker.delegate = self
         picker.dataSource = self
         
-        // Add the picker to the alert controller
         alertController.view.addSubview(picker)
         
-        // Create button action and add it to the action controller
         let selectButtonAction = UIAlertAction(title: "Select", style: UIAlertActionStyle.Default) { (action: UIAlertAction) -> Void in
             self.alertController.dismissViewControllerAnimated(true, completion: nil)
         }
@@ -184,11 +168,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     // MARK: - PickerView delegate methods
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
-        return Constants.numberOfComponentsInPicker
+        return viewModel.numberOfComponentsInPicker
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int{
-        return Constants.numberOfRowsInPicker
+        return viewModel.numberOfRowsInPicker
     }
     
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -223,7 +207,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         }
     }
     
-    // Triggered when the video reaches its end
     func playerItemDidReachEnd(notification: NSNotification) {
         self.player.seekToTime(kCMTimeZero)
         self.player.play()
