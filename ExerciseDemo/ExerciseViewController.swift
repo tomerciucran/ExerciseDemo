@@ -10,23 +10,15 @@ import UIKit
 import AVKit
 import AVFoundation
 
-class ExerciseViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    
-    struct Constants {
-        static let numberOfComponentsInPicker = 1
-        static let numberOfRowsInPicker = 30
-    }
+class ExerciseViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, TMRCircleTimerViewDelegate {
     
     var viewModel: ExerciseViewModel!
     var player: AVPlayer!
     var playerLayer: AVPlayerLayer!
     var videoUrl: NSURL!
-    var timer = NSTimer()
-    var counter:Int = 30
-    var counterLabel: UILabel!
     var nameLabel: UILabel!
     var variationLabel: UILabel!
-    var circleView: CircleView!
+    var timerView: TMRCircleTimerView!
     var pickerArray = [Int]()
     var alertController: UIAlertController!
     var skipButton: UIButton!
@@ -88,54 +80,15 @@ class ExerciseViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
     func skipButtonAction() {
         
         presentViewController(alertController, animated: true, completion: nil);
-        timer.invalidate()
-        counterLabel.font = UIFont(name: "AvenirNext-Demibold", size: 20)
-        counterLabel.text = "Skipped!"
-        circleView.resetCircle()
+        timerView.resetCircle()
         
     }
     
     private func addTimerView() {
         
-        circleView = CircleView(frame: CGRect(x: self.view.bounds.width/2 - 75, y: variationLabel.frame.origin.y + variationLabel.bounds.height + 20, width: 150, height: 150))
-        self.view.addSubview(circleView)
-        
-        // Trigger the circle animation
-        circleView.animateCircle(30)
-        
-        counterLabel = UILabel(frame: CGRect(x: self.view.bounds.width/2 - 50, y: variationLabel.frame.origin.y + variationLabel.bounds.height + 70, width: 100, height: 50))
-        counterLabel.text = "00:30"
-        counterLabel.textAlignment = NSTextAlignment.Center
-        counterLabel.font = UIFont(name: "AvenirNext-Demibold", size: 32)
-        self.view.addSubview(counterLabel)
-        
-        // Set timer with time interval and selector
-        timer = NSTimer.scheduledTimerWithTimeInterval(1.0
-            , target: self, selector: Selector("updateTimer:"), userInfo: nil, repeats: true)
-    }
-    
-    func updateTimer(dt: NSTimer)
-    {
-        counter--
-        if counter == 0 {
-            
-            skipButton.enabled = false
-            
-            timer.invalidate()
-            circleView.resetCircle()
-            
-            presentViewController(alertController, animated: true, completion: nil);
-            
-
-            counterLabel.font = UIFont(name: "AvenirNext-Demibold", size: 18)
-            counterLabel.text = "Completed!"
-        } else { // Set the remaining seconds to counter label
-            if counter < 10 { // Add a "0" to numbers below 10
-                counterLabel.text = "00:0\(counter)"
-            } else {
-                counterLabel.text = "00:\(counter)"
-            }
-        }
+        timerView = TMRCircleTimerView(frame: CGRect(x: self.view.bounds.width/2 - 75, y: variationLabel.frame.origin.y + variationLabel.bounds.height + 20, width: 150, height: 150), duration: 30, fillColor: UIColor.lightGrayColor(), strokeColor: UIColor.blueColor(), lineWidth: 5.0)
+        timerView.delegate = self
+        self.view.addSubview(timerView)
     }
     
     // MARK: - AlertView methods
@@ -160,9 +113,16 @@ class ExerciseViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         alertController.addAction(selectButtonAction)
         
         // Populate picker array
-        for (var i = 1; i <= Constants.numberOfRowsInPicker; i++) {
+        for (var i = 1; i <= viewModel.numberOfRowsInPicker; i++) {
             pickerArray.append(i)
         }
+    }
+    
+    // MARK: - TMRCircleTimerViewDelegate
+    
+    func timerDidFinish() {
+        presentViewController(alertController, animated: true, completion: nil);
+        timerView.resetCircle()
     }
     
     // MARK: - PickerView delegate methods
